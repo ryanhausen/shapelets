@@ -1,6 +1,7 @@
 import math
 import numpy as np
 from scipy.special import factorial
+from scipy.optimize import fmin
 
 # https://en.wikipedia.org/wiki/Hermite_polynomials#Recursion_relation
 # $$H_n(x)=n!\sum_{m=0}^{\lfloor\frac{n}{2}\rfloor}\frac{(-1)^m}{m!(n-2m)!}(2x)^{n-2m}$$
@@ -59,6 +60,7 @@ def shapelet_reconstruction(dims, xc, ns, I_ns, γ):
     return img
 
 # optimizing functions
+
 # https://arxiv.org/pdf/astro-ph/0608369.pdf, eq 8
 # $$ \chi^2 = \frac{R(\beta,n_{max},\boldsymbol{x_c})^T\cdot V^{-1} \cdot  R(\beta,n_{max},\boldsymbol{x_c})}{n_{pixels}-n_{coeffs}}$$
 # β in the above paper is γ in the first paper
@@ -73,3 +75,22 @@ def goodness_of_fit(img, V, ns, I_ns, xc, γ):
     denom = n_pixels-n_coeffs
 
     return numer/denom
+
+# https://arxiv.org/pdf/astro-ph/0307395.pdf, table 1
+TOP_SHAPLETS = [(0,0), (4,0), (2,0), (0,4), (6,0), (2,2), (0,2), (8,0), (0,1), (1,0)]
+
+def get_optimal_shapelets(img, xc, V):
+
+
+
+    def optimize(args):
+        I_ns =  args[:-1]
+        γ = args[-1]
+
+
+
+        fit = 0.0
+        for ins, ns in zip(I_ns, TOP_SHAPLETS):
+            fit += goodness_of_fit(img, V, ns, ins, xc, γ)
+
+        return fit
