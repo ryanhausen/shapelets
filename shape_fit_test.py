@@ -13,14 +13,10 @@ segmap = fits.getdata('GDS_deep2_4135_segmap.fits')
 
 
 xc = [43, 43]
-#V = np.var(img[segmap==0].flatten())
-#V = np.ones([84,84])*V
+V = np.var(img[segmap==0].flatten())
+V = np.diag(np.ones([84*84])*V)
 img_f = img.flatten()
-img_f = np.array([img_f, img_f])
-
-
-
-V = np.cov(img_f.T, rowvar=True)
+#img_f = np.array([img_f, img_f])
 
 #opts, (n1_map, n2_map) = sh.solve_shapelet_coefficients(img, xc, 1.5)
 #opts = opts.flatten()
@@ -32,19 +28,19 @@ V = np.cov(img_f.T, rowvar=True)
 
 def best_gamma(gamma):
     gamma = gamma[0]
-    opts, (n1_map, n2_map) = sh.solve_shapelet_coefficients(img, xc, gamma)
+    opts, (n1_map, n2_map) = sh.solve_shapelet_coefficients(img, xc, gamma, V=V)
     I_n = [(opts[n1_map[n1]], opts[n2_map[n2]]) for n1, n2 in sh.TOP_SHAPELETS]
 
-    fit = sh.goodness_of_fit(img, sh.TOP_SHAPELETS, I_n, xc, gamma).sum()
+    fit = sh.goodness_of_fit(img, sh.TOP_SHAPELETS, I_n, xc, gamma, V).sum()
     print(fit, gamma)
     
     #return (fit-1)**2
     return fit
 
 
-gamma = fmin(best_gamma, [0.9])
+gamma = fmin(best_gamma, [1000])
 
-opts, (n1_map, n2_map) = sh.solve_shapelet_coefficients(img, xc, gamma)
+opts, (n1_map, n2_map) = sh.solve_shapelet_coefficients(img, xc, gamma, V)
 I_n = [(opts[n1_map[n1]], opts[n2_map[n2]]) for n1, n2 in sh.TOP_SHAPELETS]
 
 

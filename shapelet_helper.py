@@ -67,17 +67,14 @@ def shapelet_reconstruction(dims, xc, ns, I_ns, γ):
 # https://arxiv.org/pdf/astro-ph/0608369.pdf, eq 8
 # $$ \chi^2 = \frac{R(\beta,n_{max},\boldsymbol{x_c})^T\cdot V^{-1} \cdot  R(\beta,n_{max},\boldsymbol{x_c})}{n_{pixels}-n_{coeffs}}$$
 # β in the above paper is γ in the first paper
-def goodness_of_fit(img, ns, I_ns, xc, γ, V=None):
-    I = img
-    I_recov = shapelet_reconstruction(img.shape, xc, ns, I_ns, γ)
+def goodness_of_fit(img, ns, I_ns, xc, γ, V):
+    I = img.flatten()
+    I_recov = shapelet_reconstruction(img.shape, xc, ns, I_ns, γ).flatten()
     R = I-I_recov
     n_pixels = len(img)
     n_coeffs = len(ns)
 
-    if V:
-        numer = R.T.dot(np.linalg.inv(V)).dot(R)
-    else:
-        numer = R.T.dot(R)
+    numer = R.T.dot(np.linalg.inv(V)).dot(R)
     denom = n_pixels-n_coeffs
 
     return numer/denom
@@ -116,25 +113,25 @@ def make_M(dims, xc, ns, γ):
 
 import matplotlib.pyplot as plt
 # https://arxiv.org/pdf/astro-ph/0608369.pdf, eq 10
-def solve_shapelet_coefficients(img, xc, γ, V=None):
+def solve_shapelet_coefficients(img, xc, γ, V):
 
     M, nkeys = make_M(img.shape, xc, TOP_SHAPELETS, γ)
     I = img.flatten()[:,np.newaxis]
 
 
-    if V:
-        V = np.inv(V)
-        MᵀVM = M.T.dot(V).dot(M)
-        MᵀVM_inv = np.inv(MᵀVM)
-        MᵀVM_invMᵀ = MᵀVM_inv.dot(M.T)
-        MᵀVM_invMᵀV = MᵀVM_invMᵀ.dot(V)
-        MᵀVM_invMᵀVI = MᵀVM_invMᵀV.dot(I)
+    #if V is None:
+    V = np.linalg.inv(V)
+    MᵀVM = M.T.dot(V).dot(M)
+    MᵀVM_inv = np.linalg.inv(MᵀVM)
+    MᵀVM_invMᵀ = MᵀVM_inv.dot(M.T)
+    MᵀVM_invMᵀV = MᵀVM_invMᵀ.dot(V)
+    MᵀVM_invMᵀVI = MᵀVM_invMᵀV.dot(I)
 
-        return MᵀVM_invMᵀVI, nkeys
-    else:
-        MᵀM  = M.T.dot(M)
-        MᵀM_inv = np.linalg.inv(MᵀM)
-        MᵀM_inv_Mᵀ = MᵀM_inv.dot(M.T)
-        MᵀM_inv_MᵀI = MᵀM_inv_Mᵀ.dot(I)
+    return MᵀVM_invMᵀVI, nkeys
+    #else:
+    #    MᵀM  = M.T.dot(M)
+    #    MᵀM_inv = np.linalg.inv(MᵀM)
+    #    MᵀM_inv_Mᵀ = MᵀM_inv.dot(M.T)
+    #    MᵀM_inv_MᵀI = MᵀM_inv_Mᵀ.dot(I)
 
-        return MᵀM_inv_MᵀI, nkeys
+    #    return MᵀM_inv_MᵀI, nkeys
