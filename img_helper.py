@@ -47,8 +47,8 @@ def get_theta(img, src_map):
         pairs[evals[i]] = evecs[:, i]
 
     major_x, major_y = pairs[evals.max()]
-    theta = np.tanh(major_x/major_y)
-    return theta
+    theta = np.arctan(major_y/major_x)
+    return -theta
 
 def _translate(u,v):
     return np.array([
@@ -81,39 +81,3 @@ def rotate_img(img, src_map):
     tmp = tmp.transform((84,84), Image.AFFINE, data=trans, resample=Image.BILINEAR)
     img = np.asarray(tmp)
     return img
-
-
-def extra():
-    img = fits.getdata('GDS_deep2_4135_h.fits')
-    segmap = fits.getdata('GDS_deep2_4135_segmap.fits')
-    src_map = segmap==4135
-
-    cy, cx = img_center(img, src_map)
-
-    cov = moments_cov(img, src_map)
-    evals, evecs = np.linalg.eig(cov)
-    pairs = {}
-    for i in range(2):
-        pairs[evals[i]] = evecs[:, i]
-
-    eval_maj = evals.max()
-    eval_min = evals.min()
-
-    major_x, major_y = pairs[eval_maj]  # Eigenvector with largest eigenvalue
-    minor_x, minor_y = pairs[eval_min]
-
-    scale = np.sqrt(eval_maj) * np.array([-1.0, 1.0])
-    major_x_line = scale * major_x + x
-    major_y_line = scale * major_y + y
-
-    scale = np.sqrt(eval_min) * np.array([-1.0, 1.0])
-    minor_x_line = scale * minor_x + x
-    minor_y_line = scale * minor_y + y
-
-    theta = 0.5 * np.arctan((2 * cov[0,1])/(cov[0,0] - cov[1,1]))
-    theta = np.rad2deg(theta)
-    print(f'Theta:{theta}')
-
-
-
-

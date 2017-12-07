@@ -114,13 +114,18 @@ def make_M(dims, xc, ns, γ):
 import matplotlib.pyplot as plt
 # https://arxiv.org/pdf/astro-ph/0608369.pdf, eq 10
 def solve_shapelet_coefficients(img, xc, γ, V):
+    """
+    img: the image
+    xc: center of the image
+    γ: γ scale for the shapelet equation
+    V: the INVERTED noise matrix
+    """
 
     M, nkeys = make_M(img.shape, xc, TOP_SHAPELETS, γ)
     I = img.flatten()[:,np.newaxis]
 
 
     #if V is None:
-    V = np.linalg.inv(V)
     MᵀVM = M.T.dot(V).dot(M)
     MᵀVM_inv = np.linalg.inv(MᵀVM)
     MᵀVM_invMᵀ = MᵀVM_inv.dot(M.T)

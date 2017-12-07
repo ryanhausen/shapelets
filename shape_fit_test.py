@@ -11,18 +11,18 @@ import img_helper as ih
 img = fits.getdata('GDS_deep2_4135_h.fits')
 segmap = fits.getdata('GDS_deep2_4135_segmap.fits')
 
-print(np.rad2deg(ih.get_theta(img, segmap==4135)))
-
-plt.figure()
-plt.imshow(img)
-plt.figure()
-plt.imshow(ih.rotate_img(img, segmap==4135))
-plt.show()
+#plt.figure()
+#plt.imshow(img)
+#plt.figure()
+#plt.imshow(ih.rotate_img(img, segmap==4135))
+#plt.show()
 
 xc = [43, 43]
 V = np.var(img[segmap==0].flatten())
 V = np.diag(np.ones([84*84])*V)
-img_f = img.flatten()
+V = np.linalg.inv(V)
+
+img = ih.rotate_img(img, segmap==4135)
 #img_f = np.array([img_f, img_f])
 
 #opts, (n1_map, n2_map) = sh.solve_shapelet_coefficients(img, xc, 1.5)
@@ -31,11 +31,9 @@ img_f = img.flatten()
 
 #I_n = [(opts[n1_map[n1]], opts[n2_map[n2]]) for n1, n2 in sh.TOP_SHAPELETS]
 
-
-
 def best_gamma(gamma):
     gamma = gamma[0]
-    opts, (n1_map, n2_map) = sh.solve_shapelet_coefficients(img, xc, gamma, V=V)
+    opts, (n1_map, n2_map) = sh.solve_shapelet_coefficients(img, xc, gamma, V)
     I_n = [(opts[n1_map[n1]], opts[n2_map[n2]]) for n1, n2 in sh.TOP_SHAPELETS]
 
     fit = sh.goodness_of_fit(img, sh.TOP_SHAPELETS, I_n, xc, gamma, V).sum()
@@ -45,24 +43,31 @@ def best_gamma(gamma):
     return fit
 
 
-#gamma = fmin(best_gamma, [1000])
+gamma = fmin(best_gamma, [1000])
 
-#opts, (n1_map, n2_map) = sh.solve_shapelet_coefficients(img, xc, gamma, V)
-#I_n = [(opts[n1_map[n1]], opts[n2_map[n2]]) for n1, n2 in sh.TOP_SHAPELETS]
+rotated_img = ih.rotate_img(img, segmap==4135)
+opts, (n1_map, n2_map) = sh.solve_shapelet_coefficients(rotated_img, 
+                                                        xc, 
+                                                        gamma, 
+                                                        V)
+
+I_n = [(opts[n1_map[n1]], opts[n2_map[n2]]) for n1, n2 in sh.TOP_SHAPELETS]
 
 
-#sh_img = sh.shapelet_reconstruction(img.shape, xc, sh.TOP_SHAPELETS, I_n, gamma)
+sh_img = sh.shapelet_reconstruction(img.shape, xc, sh.TOP_SHAPELETS, I_n, gamma)
 
-#plt.figure()
-#plt.imshow(img, cmap='gray')
+plt.figure()
+plt.imshow(img, cmap='gray')
 
-#plt.figure()
-#plt.imshow(sh_img, cmap='gray')
+plt.figure()
+plt.imshow(sh_img, cmap='gray')
 
-#plt.figure()
-#plt.imshow(img-sh_img, cmap='gray')
+plt.figure()
+plt.imshow(img-sh_img, cmap='gray')
 
-#plt.show()
+plt.show()
+
+
 
 
 
