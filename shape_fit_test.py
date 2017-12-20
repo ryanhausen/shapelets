@@ -25,11 +25,6 @@ V = np.linalg.inv(V)
 img = ih.rotate_img(img, segmap==4135)
 #img_f = np.array([img_f, img_f])
 
-#opts, (n1_map, n2_map) = sh.solve_shapelet_coefficients(img, xc, 1.5)
-#opts = opts.flatten()
-#print(opts)
-
-#I_n = [(opts[n1_map[n1]], opts[n2_map[n2]]) for n1, n2 in sh.TOP_SHAPELETS]
 
 def best_gamma(gamma):
     gamma = gamma[0]
@@ -38,17 +33,17 @@ def best_gamma(gamma):
 
     fit = sh.goodness_of_fit(img, sh.TOP_SHAPELETS, I_n, xc, gamma, V).sum()
     print(fit, gamma)
-    
+
     #return (fit-1)**2
     return fit
 
 
-gamma = fmin(best_gamma, [1000])
+gamma = fmin(best_gamma, [1.0])
 
 rotated_img = ih.rotate_img(img, segmap==4135)
-opts, (n1_map, n2_map) = sh.solve_shapelet_coefficients(rotated_img, 
-                                                        xc, 
-                                                        gamma, 
+opts, (n1_map, n2_map) = sh.solve_shapelet_coefficients(rotated_img,
+                                                        xc,
+                                                        gamma,
                                                         V)
 
 I_n = [(opts[n1_map[n1]], opts[n2_map[n2]]) for n1, n2 in sh.TOP_SHAPELETS]
@@ -73,7 +68,7 @@ plt.show()
 
 
 
-    
+
 
 
 #opts = sh.solve_shapelet_coefficients(img, xc, gamma)
@@ -88,5 +83,5 @@ plt.show()
 
 #plt.figure()
 #plt.imshow(i_recov, cmap='gray')
- 
+
 #plt.show()
