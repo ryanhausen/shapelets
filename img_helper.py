@@ -91,8 +91,12 @@ def get_params(img, src_map):
     axis_ratio = np.sqrt(evals.min()/evals.max())
 
     # γ1 and γ2
-    Ixx = M10
-    Iyy = M01
+    y, x = np.where(np.ones_like(img, dtype=np.bool))
+    M_seg = lambda i, j: raw_moment(src_map, x, y, i, j)
+
+    Ixx = M_seg(1, 0)
+    Iyy = M_seg(0, 1)
+    print(Ixx, Iyy)
 
     γ1 = np.sqrt((Ixx + Iyy) / (1 + axis_ratio**2))
     γ2 = axis_ratio * γ1

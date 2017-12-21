@@ -80,7 +80,7 @@ def fit_shapelets(img, mask, ns=TOP_SHAPELETS):
     # get params from the image
     Θ, axis_ratio, γ1, γ2, yc_xc = ih.get_params(img, mask)
     print(Θ, axis_ratio, γ1, γ2, yc_xc)
-    γ1, γ2 = 0.98, 0.98
+    #γ1, γ2 = 0.98, 0.98
 
     # Variance matrix V
     V = np.var(img[mask==0].flatten())
